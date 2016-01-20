@@ -81,10 +81,15 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         mWavePaint.setAntiAlias(true);
 
         mWaveColor = DEFAULT_WAVE_COLOR;
+        mAmplitudeRatio = DEFAULT_AMPLITUDE_RATIO;
 
+        // init Border
+        mBorderPaint = new Paint();
+        mBorderPaint.setAntiAlias(true);
+        mBorderPaint.setStyle(Paint.Style.STROKE);
+        mBorderPaint.setStrokeWidth(2);
+        mBorderPaint.setColor(DEFAULT_WAVE_COLOR);
 
-        mWavePaint = new Paint();
-        mWavePaint.setAntiAlias(true);
     }
 
     @Override
@@ -92,5 +97,78 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         super.onDraw(canvas);
 
         canvas.drawCircle(100, 100, 50, mWavePaint);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = measureWidth(widthMeasureSpec);
+        int height = measureWidth(heightMeasureSpec);
+        int radius = width > height ? width : height;
+        setMeasuredDimension(radius, radius);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        initWaveShader();
+    }
+
+    private void initWaveShader() {
+
+        if (bitmapBuffer == null) {
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            if (width > 0 && height > 0) {
+                // 2*pi
+                double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
+                float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
+                mDefaultWaterLevel = height * DEFAULT_WATER_LEVEL_RATIO;
+                float defaultWaveLength = width;
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+
+                Paint wavePaint = new Paint();
+                wavePaint.setStrokeWidth(2);
+                wavePaint.setAntiAlias(true);
+
+                int endX = width;
+                int endY = height;
+
+                float[] waveY = new float[endY];
+
+                wavePaint.setColor(adjustAlpha(mWaveColor, 0.3f));
+                for (int beginX = 0; beginX <= endX; beginX++) {
+                    double wx=beginX*defaultAngularFrequency;
+                    // float begin
+                }
+            }
+
+        }
+    }
+
+    private int adjustAlpha(int color, float factor) {
+        int alpha = Math.round(Color.alpha(color) * factor);
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        return Color.argb(alpha, red, green, blue);
+    }
+
+    private int measureWidth(int measureSpec) {
+        int result = mCanvasSize;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        switch (specMode) {
+            case MeasureSpec.UNSPECIFIED:
+                result = mCanvasSize;
+                break;
+            case MeasureSpec.AT_MOST:
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+        }
+        return result;
+
     }
 }
