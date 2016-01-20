@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -53,7 +54,7 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
     private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
     private static final int DEFAULT_WAVE_PROGRESS_VALUE = 50;
-    private static final int DEFAULT_WAVE_COLOR = Color.parseColor("#212121");
+    private static final int DEFAULT_WAVE_COLOR = Color.parseColor("#FF4081");
     private static final int DEFAULT_TITLE_COLOR = Color.parseColor("#212121");
     private static final float DEFAULT_BORDER_WIDTH = 0;
     private static final float DEFAULT_TITLE_TOP_SIZE = 18.0f;
@@ -94,9 +95,17 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        //        float borderWidth = mBorderPaint.getStrokeWidth();
+        //        if (borderWidth > 0) {
+        //            canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
+        //                    (getWidth() - borderWidth) / 2f - 1f, mBorderPaint);
+        //        }
 
-        canvas.drawCircle(100, 100, 50, mWavePaint);
+        float radius = getWidth() / 2f;
+        // mWavePaint.setShader(mWaveShader);
+        // mWavePaint.setColor(DEFAULT_WAVE_COLOR);
+        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mWavePaint);
+        // canvas.drawBitmap(bitmapBuffer, 0, 0, new Paint());
     }
 
     @Override
@@ -134,13 +143,25 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
                 int endX = width;
                 int endY = height;
 
-                float[] waveY = new float[endY];
+                float[] waveY = new float[endX + 1];
 
                 wavePaint.setColor(adjustAlpha(mWaveColor, 0.3f));
                 for (int beginX = 0; beginX <= endX; beginX++) {
-                    double wx=beginX*defaultAngularFrequency;
-                    // float begin
+                    double wx = beginX * defaultAngularFrequency;
+                    float beginY = (float) (mDefaultWaterLevel + defaultAmplitude * Math.sin(wx));
+                    canvas.drawLine(beginX, beginY, beginX, endY, wavePaint);
+                    waveY[beginX] = beginY;
                 }
+
+                wavePaint.setColor(mWaveColor);
+                int waveShift = (int) defaultWaveLength / 4;
+                for (int beginX = 0; beginX <= endX; beginX++) {
+                    canvas.drawLine(beginX, waveY[(beginX + waveShift) % endX], beginX, endY, wavePaint);
+                }
+
+                mWaveShader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
+                this.mWavePaint.setShader(mWaveShader);
+                bitmapBuffer = bitmap;
             }
 
         }

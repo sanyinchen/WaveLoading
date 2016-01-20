@@ -4,6 +4,8 @@ import com.tony.wavelibrary.WaveLoadingView;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,6 +14,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // setContentView(R.layout.activity_main);
         WaveLoadingView waveLoadingView = new WaveLoadingView(this);
-        setContentView(waveLoadingView);
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(400,
+                400));
+        setContentView(linearLayout);
     }
 }
