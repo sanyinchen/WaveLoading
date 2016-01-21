@@ -16,8 +16,8 @@ public class MainActivity extends AppCompatActivity {
         WaveLoadingView waveLoadingView = new WaveLoadingView(this);
 
         LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(400,
-                400));
+        linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(linearLayout);
     }
 }

@@ -4,6 +4,8 @@
 package com.tony.wavelibrary;
 
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -13,7 +15,9 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 
 /**
  * Created by sanyinchen on 16/1/19.
@@ -30,9 +34,8 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     // Properties.
     private String mTopTitle;
-    private String mCenterTitle;
-    private String mBottomTitle;
     private float mDefaultWaterLevel;
+    private float mWaveShiftRatio = DEFAULT_WAVE_SHIFT_RATIO;
 
     // Object used to draw.
     // Shader containing repeated waves.
@@ -50,6 +53,7 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     // Default config
     private static final float DEFAULT_AMPLITUDE_RATIO = 0.1f;
+    private static final float DEFAULT_AMPLITUDE = 0.07f;
     private static final float DEFAULT_WATER_LEVEL_RATIO = 0.5f;
     private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
@@ -82,89 +86,137 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         mWavePaint.setAntiAlias(true);
 
         mWaveColor = DEFAULT_WAVE_COLOR;
-        mAmplitudeRatio = DEFAULT_AMPLITUDE_RATIO;
+        mAmplitudeRatio = DEFAULT_AMPLITUDE;
 
         // init Border
         mBorderPaint = new Paint();
         mBorderPaint.setAntiAlias(true);
         mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setStrokeWidth(2);
+        mBorderPaint.setStrokeWidth(4);
         mBorderPaint.setColor(DEFAULT_WAVE_COLOR);
 
+        // Init Animation
+        initAnimation();
+
+    }
+
+    private void initAnimation() {
+        ObjectAnimator waveShift = ObjectAnimator.ofFloat(this, "waveShiftRatio", 0f, 1f);
+        waveShift.setRepeatCount(ValueAnimator.INFINITE);
+        waveShift.setDuration(1000);
+        waveShift.setInterpolator(new LinearInterpolator());
+
+        mAnimatorSet = new AnimatorSet();
+        mAnimatorSet.play(waveShift);
+    }
+
+    public float getWaveShiftRatio() {
+        return mWaveShiftRatio;
+    }
+
+    public void setWaveShiftRatio(float waveShiftRatio) {
+        // Log.d("srcomp_wave", "setWaveShiftRatio-------");
+        if (this.mWaveShiftRatio != waveShiftRatio) {
+            this.mWaveShiftRatio = waveShiftRatio;
+            // Log.d("srcomp_wave", "setWaveShiftRatio-------" + waveShiftRatio);
+            invalidate();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        Log.d("srcomp_wave", "onAttachedToWindow-------");
+        if (mAnimatorSet != null) {
+            mAnimatorSet.start();
+        }
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        Log.d("srcomp_wave", "onDetachedFromWindow-------");
+        if (mAnimatorSet != null) {
+            mAnimatorSet.end();
+        }
+        super.onDetachedFromWindow();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //        float borderWidth = mBorderPaint.getStrokeWidth();
-        //        if (borderWidth > 0) {
-        //            canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
-        //                    (getWidth() - borderWidth) / 2f - 1f, mBorderPaint);
-        //        }
+        // Log.d("srcomp_wave", "onDraw-------");
 
-        float radius = getWidth() / 2f;
-        // mWavePaint.setShader(mWaveShader);
-        // mWavePaint.setColor(DEFAULT_WAVE_COLOR);
+        mShaderMatrix.setScale(1, mAmplitudeRatio / DEFAULT_AMPLITUDE_RATIO, 0, mDefaultWaterLevel);
+        mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()), 0);
+        mWaveShader.setLocalMatrix(mShaderMatrix);
+        // Log.d("srcomp_wave", "getWidth:" + getWidth());
+        float borderWidth = mBorderPaint.getStrokeWidth();
+        if (borderWidth > 0) {
+            canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
+                    (getWidth() - borderWidth) / 2f - 1f, mBorderPaint);
+        }
+        float radius = getWidth() / 2f - borderWidth;
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mWavePaint);
-        // canvas.drawBitmap(bitmapBuffer, 0, 0, new Paint());
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Log.d("srcomp_wave", "onMeasure-------");
         int width = measureWidth(widthMeasureSpec);
         int height = measureWidth(heightMeasureSpec);
-        int radius = width > height ? width : height;
+        int radius = width < height ? width : height;
+        // Log.d("srcomp_wave", "radius:" + radius);
         setMeasuredDimension(radius, radius);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        Log.d("srcomp_wave", "onSizeChanged-------");
         initWaveShader();
     }
 
     private void initWaveShader() {
 
-        if (bitmapBuffer == null) {
-            int width = getMeasuredWidth();
-            int height = getMeasuredHeight();
-            if (width > 0 && height > 0) {
-                // 2*pi
-                double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
-                float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
-                mDefaultWaterLevel = height * DEFAULT_WATER_LEVEL_RATIO;
-                float defaultWaveLength = width;
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
+        if (width > 0 && height > 0) {
+            // 2*pi
+            double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
+            float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
+            mDefaultWaterLevel = height * DEFAULT_WATER_LEVEL_RATIO;
+            float defaultWaveLength = width;
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
 
-                Paint wavePaint = new Paint();
-                wavePaint.setStrokeWidth(2);
-                wavePaint.setAntiAlias(true);
+            Paint wavePaint = new Paint();
+            wavePaint.setStrokeWidth(2);
+            wavePaint.setAntiAlias(true);
 
-                int endX = width;
-                int endY = height;
+            int endX = width;
+            int endY = height;
 
-                float[] waveY = new float[endX + 1];
+            float[] waveY = new float[endX + 1];
 
-                wavePaint.setColor(adjustAlpha(mWaveColor, 0.3f));
-                for (int beginX = 0; beginX <= endX; beginX++) {
-                    double wx = beginX * defaultAngularFrequency;
-                    float beginY = (float) (mDefaultWaterLevel + defaultAmplitude * Math.sin(wx));
-                    canvas.drawLine(beginX, beginY, beginX, endY, wavePaint);
-                    waveY[beginX] = beginY;
-                }
-
-                wavePaint.setColor(mWaveColor);
-                int waveShift = (int) defaultWaveLength / 4;
-                for (int beginX = 0; beginX <= endX; beginX++) {
-                    canvas.drawLine(beginX, waveY[(beginX + waveShift) % endX], beginX, endY, wavePaint);
-                }
-
-                mWaveShader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
-                this.mWavePaint.setShader(mWaveShader);
-                bitmapBuffer = bitmap;
+            wavePaint.setColor(adjustAlpha(mWaveColor, 0.3f));
+            for (int beginX = 0; beginX <= endX; beginX++) {
+                double wx = beginX * defaultAngularFrequency;
+                float beginY = (float) (mDefaultWaterLevel + defaultAmplitude * Math.sin(wx));
+                canvas.drawLine(beginX, beginY, beginX, endY, wavePaint);
+                waveY[beginX] = beginY;
             }
 
+            wavePaint.setColor(mWaveColor);
+            int waveShift = (int) defaultWaveLength / 4;
+            for (int beginX = 0; beginX <= endX; beginX++) {
+                canvas.drawLine(beginX, waveY[(beginX + waveShift) % endX], beginX, endY, wavePaint);
+            }
+
+            mWaveShader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
+            this.mWavePaint.setShader(mWaveShader);
+            bitmapBuffer = bitmap;
         }
+
     }
 
     private int adjustAlpha(int color, float factor) {
