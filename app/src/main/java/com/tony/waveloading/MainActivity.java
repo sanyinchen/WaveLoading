@@ -1,5 +1,6 @@
 package com.tony.waveloading;
 
+import com.tony.wavelibrary.WaveConfig;
 import com.tony.wavelibrary.WaveLoadingView;
 
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // setContentView(R.layout.activity_main);
-        WaveLoadingView waveLoadingView = new WaveLoadingView(this);
+        WaveConfig waveConfig = new WaveConfig();
+        WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
 
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

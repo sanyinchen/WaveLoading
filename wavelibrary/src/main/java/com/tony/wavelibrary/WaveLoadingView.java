@@ -3,6 +3,8 @@
  */
 package com.tony.wavelibrary;
 
+import java.lang.ref.WeakReference;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -14,7 +16,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
@@ -22,21 +23,20 @@ import android.view.animation.LinearInterpolator;
 /**
  * Created by sanyinchen on 16/1/19.
  */
-public class WaveLoadingView extends View implements WaveLoadingInterface {
+public class WaveLoadingView extends View {
     // draw
     private Context mContext;
 
     // Dynamic Properties.
-    private int mCanvasSize;
     private float mAmplitudeRatio;
     private int mWaveColor;
-    private int mShapeType;
+    private WaveConfig waveConfig;
 
-    // Properties.
-    private String mTopTitle;
-    private float mDefaultWaterLevel;
+    // Properties
+    private int mCanvasSize;
     private float mWaveShiftRatio = DEFAULT_WAVE_SHIFT_RATIO;
-
+    private String mTitle;
+    private float mDefaultWaterLevel;
     // Object used to draw.
     // Shader containing repeated waves.
     private BitmapShader mWaveShader;
@@ -48,36 +48,31 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
     // Paint to draw border.
     private Paint mBorderPaint;
 
+    private Paint mTextPaint;
+
     // Animation.
     private AnimatorSet mAnimatorSet;
 
     // Default config
     private static final float DEFAULT_AMPLITUDE_RATIO = 0.1f;
     private static final float DEFAULT_AMPLITUDE = 0.07f;
-    private static final float DEFAULT_WATER_LEVEL_RATIO = 0.5f;
+
     private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
-    private static final int DEFAULT_WAVE_PROGRESS_VALUE = 50;
-    private static final int DEFAULT_WAVE_COLOR = Color.parseColor("#FF4081");
-    private static final int DEFAULT_TITLE_COLOR = Color.parseColor("#212121");
-    private static final float DEFAULT_BORDER_WIDTH = 0;
-    private static final float DEFAULT_TITLE_TOP_SIZE = 18.0f;
-    private static final float DEFAULT_TITLE_CENTER_SIZE = 22.0f;
-    private static final float DEFAULT_TITLE_BOTTOM_SIZE = 18.0f;
 
-    public WaveLoadingView(Context context) {
+    public WaveLoadingView(Context context, WaveConfig waveConfig) {
         super(context);
+        if (waveConfig == null) {
+            new Exception("WaveConfig must not be null");
+        }
+        this.waveConfig = waveConfig;
         init(context);
-    }
-
-    @Override
-    public void onProcess(int process) {
-
     }
 
     private void init(Context mContext) {
         this.mContext = mContext;
 
+        mTitle = waveConfig.getmWavelevel() * 1000 / 100 + "%";
         // Init Wave.
         mShaderMatrix = new Matrix();
         mWavePaint = new Paint();
@@ -85,15 +80,26 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         // but is has no impact on the interior of the shape.
         mWavePaint.setAntiAlias(true);
 
-        mWaveColor = DEFAULT_WAVE_COLOR;
+        mWaveColor = waveConfig.getmWaveColor();
         mAmplitudeRatio = DEFAULT_AMPLITUDE;
 
         // init Border
         mBorderPaint = new Paint();
         mBorderPaint.setAntiAlias(true);
         mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setStrokeWidth(4);
-        mBorderPaint.setColor(DEFAULT_WAVE_COLOR);
+        mBorderPaint.setStrokeWidth(waveConfig.getmBoardSize());
+        mBorderPaint.setColor(waveConfig.getmWaveColor());
+
+        mTextPaint = new Paint();
+        mTextPaint.setAntiAlias(true);
+        mTextPaint.setColor(waveConfig.getmTitleColor());
+        mTextPaint.setStyle(Paint.Style.FILL);
+        // mTextPaint.setStrokeWidth(4);
+        mTextPaint.setTextSize(CommonUtils.sp2px(getContext(), waveConfig.getmTitleSizeSp()));
+
+        int w = getWidth();
+        int h = getHeight();
+        mCanvasSize = w < h ? w : h;
 
         // Init Animation
         initAnimation();
@@ -125,7 +131,6 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     @Override
     protected void onAttachedToWindow() {
-        Log.d("srcomp_wave", "onAttachedToWindow-------");
         if (mAnimatorSet != null) {
             mAnimatorSet.start();
         }
@@ -134,7 +139,6 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     @Override
     protected void onDetachedFromWindow() {
-        Log.d("srcomp_wave", "onDetachedFromWindow-------");
         if (mAnimatorSet != null) {
             mAnimatorSet.end();
         }
@@ -143,8 +147,8 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // Log.d("srcomp_wave", "onDraw-------");
 
+        mCanvasSize = canvas.getWidth();
         mShaderMatrix.setScale(1, mAmplitudeRatio / DEFAULT_AMPLITUDE_RATIO, 0, mDefaultWaterLevel);
         mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()), 0);
         mWaveShader.setLocalMatrix(mShaderMatrix);
@@ -157,15 +161,16 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         float radius = getWidth() / 2f - borderWidth;
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mWavePaint);
 
+        float midle = mTextPaint.measureText(mTitle);
+        canvas.drawText(mTitle, getWidth() / 2 - midle, mDefaultWaterLevel, mTextPaint);
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // Log.d("srcomp_wave", "onMeasure-------");
         int width = measureWidth(widthMeasureSpec);
         int height = measureWidth(heightMeasureSpec);
         int radius = width < height ? width : height;
-        // Log.d("srcomp_wave", "radius:" + radius);
         setMeasuredDimension(radius, radius);
     }
 
@@ -174,6 +179,7 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         super.onSizeChanged(w, h, oldw, oldh);
         Log.d("srcomp_wave", "onSizeChanged-------");
         initWaveShader();
+
     }
 
     private void initWaveShader() {
@@ -184,7 +190,7 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
             // 2*pi
             double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
             float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
-            mDefaultWaterLevel = height * DEFAULT_WATER_LEVEL_RATIO;
+            mDefaultWaterLevel = height * (1f - waveConfig.getmWavelevel());
             float defaultWaveLength = width;
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -244,4 +250,5 @@ public class WaveLoadingView extends View implements WaveLoadingInterface {
         return result;
 
     }
+
 }
