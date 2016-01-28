@@ -71,8 +71,8 @@ public class WaveLoadingView extends View {
 
     private void init(Context mContext) {
         this.mContext = mContext;
-
-        mTitle = waveConfig.getmWavelevel() * 1000 / 100 + "%";
+        Log.d("srcomp_wave", "waveLevel-------" + waveConfig.getmWavelevel());
+        mTitle = (int) (waveConfig.getmWavelevel() * 10000) / 100 + "%";
         // Init Wave.
         mShaderMatrix = new Matrix();
         mWavePaint = new Paint();
@@ -147,12 +147,14 @@ public class WaveLoadingView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-
+        // mDefaultWaterLevel = getHeight() * (1f - waveConfig.getmWavelevel());
+        mDefaultWaterLevel=getHeight();
         mCanvasSize = canvas.getWidth();
+        mAmplitudeRatio=0.05f;
         mShaderMatrix.setScale(1, mAmplitudeRatio / DEFAULT_AMPLITUDE_RATIO, 0, mDefaultWaterLevel);
         mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()), 0);
         mWaveShader.setLocalMatrix(mShaderMatrix);
-        // Log.d("srcomp_wave", "getWidth:" + getWidth());
+        // Log.d("srcomp_wave", "getmWavelevel:" + waveConfig.getmWavelevel());
         float borderWidth = mBorderPaint.getStrokeWidth();
         if (borderWidth > 0) {
             canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
@@ -160,7 +162,7 @@ public class WaveLoadingView extends View {
         }
         float radius = getWidth() / 2f - borderWidth;
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mWavePaint);
-
+        // canvas.drawBitmap(bitmapBuffer, 0, 0, mWavePaint);
         float midle = mTextPaint.measureText(mTitle);
         canvas.drawText(mTitle, getWidth() / 2 - midle, mDefaultWaterLevel, mTextPaint);
 
@@ -190,7 +192,7 @@ public class WaveLoadingView extends View {
             // 2*pi
             double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
             float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
-            mDefaultWaterLevel = height * (1f - waveConfig.getmWavelevel());
+            mDefaultWaterLevel = height * 0.5f;
             float defaultWaveLength = width;
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -199,13 +201,13 @@ public class WaveLoadingView extends View {
             wavePaint.setStrokeWidth(2);
             wavePaint.setAntiAlias(true);
 
-            int endX = width;
-            int endY = height;
+            int endX = width + 1;
+            int endY = height + 1;
 
-            float[] waveY = new float[endX + 1];
+            float[] waveY = new float[endX];
 
             wavePaint.setColor(adjustAlpha(mWaveColor, 0.3f));
-            for (int beginX = 0; beginX <= endX; beginX++) {
+            for (int beginX = 0; beginX < endX; beginX++) {
                 double wx = beginX * defaultAngularFrequency;
                 float beginY = (float) (mDefaultWaterLevel + defaultAmplitude * Math.sin(wx));
                 canvas.drawLine(beginX, beginY, beginX, endY, wavePaint);
@@ -214,7 +216,7 @@ public class WaveLoadingView extends View {
 
             wavePaint.setColor(mWaveColor);
             int waveShift = (int) defaultWaveLength / 4;
-            for (int beginX = 0; beginX <= endX; beginX++) {
+            for (int beginX = 0; beginX < endX; beginX++) {
                 canvas.drawLine(beginX, waveY[(beginX + waveShift) % endX], beginX, endY, wavePaint);
             }
 

@@ -16,7 +16,7 @@ public class WaveConfig {
     private int mTitleSizeSp;
     private int mBoardSize;
     private int mTitleColor;
-    private float mWavelevel; //0.1-1f
+    private float mWavelevel; //0.01-1f
 
     public WaveConfig() {
         mWaveColor = DEFAULT_WAVE_COLOR;
@@ -31,6 +31,12 @@ public class WaveConfig {
     }
 
     public WaveConfig setmWavelevel(float mWavelevel) {
+        if (Math.abs(mWavelevel - 0f) <= 0.00001f) {
+            mWavelevel = 0.01f;
+        }
+        if (Math.abs(mWavelevel - 1f) <= 0.00001f) {
+            mWavelevel = 1f;
+        }
         this.mWavelevel = mWavelevel;
         return this;
     }
@@ -39,7 +45,7 @@ public class WaveConfig {
         return mTitleColor;
     }
 
-    private WaveLoadingInterface waveLoadingInterface;
+    private WaveLoadingListener waveLoadingInterface;
 
     public int getmWaveColor() {
         return mWaveColor;
@@ -53,7 +59,7 @@ public class WaveConfig {
         return mBoardSize;
     }
 
-    public WaveLoadingInterface getWaveLoadingInterface() {
+    public WaveLoadingListener getWaveLoadingInterface() {
         return waveLoadingInterface;
     }
 
@@ -77,12 +83,12 @@ public class WaveConfig {
         return this;
     }
 
-    public WaveConfig setWaveLoadingInterface(WaveLoadingInterface waveLoadingInterface) {
+    public WaveConfig setWaveLoadingInterface(WaveLoadingListener waveLoadingInterface) {
         this.waveLoadingInterface = waveLoadingInterface;
         return this;
     }
 
-    public WaveConfig build(WaveLoadingInterface waveLoadingInterface) {
+    public WaveConfig build(WaveLoadingListener waveLoadingInterface) {
         this.waveLoadingInterface = waveLoadingInterface;
         return this;
     }
