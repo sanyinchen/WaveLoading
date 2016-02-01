@@ -16,26 +16,27 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 /**
  * Created by sanyinchen on 16/1/19.
  */
-public class WaveLoadingView extends View {
+public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     // draw
     private Context mContext;
 
     // Dynamic Properties.
-    private float mAmplitudeRatio;
     private int mWaveColor;
     private WaveConfig waveConfig;
 
     // Properties
     private int mCanvasSize;
     private float mWaveShiftRatio = DEFAULT_WAVE_SHIFT_RATIO;
-    private String mTitle;
+    private String mTitle = "0%";
     private float mDefaultWaterLevel;
     // Object used to draw.
     // Shader containing repeated waves.
@@ -49,14 +50,14 @@ public class WaveLoadingView extends View {
     private Paint mBorderPaint;
 
     private Paint mTextPaint;
-
+    private float mWavelevel;
+    private Handler handler;
     // Animation.
     private AnimatorSet mAnimatorSet;
-
+    private AnimatorSet waveLevelanimatorSet;
     // Default config
     private static final float DEFAULT_AMPLITUDE_RATIO = 0.1f;
-    private static final float DEFAULT_AMPLITUDE = 0.07f;
-
+    private static final float DEFAULT_WATER_LEVEL_RATIO = 0.5f;
     private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
 
@@ -67,12 +68,15 @@ public class WaveLoadingView extends View {
         }
         this.waveConfig = waveConfig;
         init(context);
+
     }
 
     private void init(Context mContext) {
         this.mContext = mContext;
-        Log.d("srcomp_wave", "waveLevel-------" + waveConfig.getmWavelevel());
-        mTitle = (int) (waveConfig.getmWavelevel() * 10000) / 100 + "%";
+        handler = new Handler(mContext.getMainLooper());
+        waveLevelanimatorSet = new AnimatorSet();
+        mAnimatorSet = new AnimatorSet();
+        // Log.d("srcomp_wave", "waveLevel-------" + waveConfig.getmWavelevel());
         // Init Wave.
         mShaderMatrix = new Matrix();
         mWavePaint = new Paint();
@@ -81,7 +85,6 @@ public class WaveLoadingView extends View {
         mWavePaint.setAntiAlias(true);
 
         mWaveColor = waveConfig.getmWaveColor();
-        mAmplitudeRatio = DEFAULT_AMPLITUDE;
 
         // init Border
         mBorderPaint = new Paint();
@@ -106,14 +109,38 @@ public class WaveLoadingView extends View {
 
     }
 
+    private void setProgressValue(float level) {
+        ObjectAnimator waveLevel =
+                ObjectAnimator.ofFloat(this, "waveLevelRatio", mWavelevel, level);
+        waveLevel.setDuration(1000);
+        waveLevel.setInterpolator(new DecelerateInterpolator());
+
+        waveLevelanimatorSet.play(waveLevel);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                waveLevelanimatorSet.start();
+            }
+        });
+
+    }
+
+    public void setWaveLevelRatio(float waveLevelRatio) {
+        if (this.mWavelevel < waveLevelRatio) {
+            mWavelevel = waveLevelRatio;
+            mTitle = (int) (waveLevelRatio * 100) + "%";
+            // Log.d("srcomp_wave", "setWaveLevelRatio-------" + waveLevelRatio);
+            invalidate();
+        }
+    }
+
     private void initAnimation() {
         ObjectAnimator waveShift = ObjectAnimator.ofFloat(this, "waveShiftRatio", 0f, 1f);
         waveShift.setRepeatCount(ValueAnimator.INFINITE);
         waveShift.setDuration(1000);
         waveShift.setInterpolator(new LinearInterpolator());
-
-        mAnimatorSet = new AnimatorSet();
         mAnimatorSet.play(waveShift);
+
     }
 
     public float getWaveShiftRatio() {
@@ -148,11 +175,10 @@ public class WaveLoadingView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // mDefaultWaterLevel = getHeight() * (1f - waveConfig.getmWavelevel());
-        mDefaultWaterLevel=getHeight();
         mCanvasSize = canvas.getWidth();
-        mAmplitudeRatio=0.05f;
-        mShaderMatrix.setScale(1, mAmplitudeRatio / DEFAULT_AMPLITUDE_RATIO, 0, mDefaultWaterLevel);
-        mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()), 0);
+        mShaderMatrix.setScale(1, waveConfig.getmAmplitudeRatio() / DEFAULT_AMPLITUDE_RATIO, 0, mDefaultWaterLevel);
+        mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()),
+                (DEFAULT_WATER_LEVEL_RATIO - mWavelevel) * getHeight());
         mWaveShader.setLocalMatrix(mShaderMatrix);
         // Log.d("srcomp_wave", "getmWavelevel:" + waveConfig.getmWavelevel());
         float borderWidth = mBorderPaint.getStrokeWidth();
@@ -179,7 +205,7 @@ public class WaveLoadingView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.d("srcomp_wave", "onSizeChanged-------");
+        // Log.d("srcomp_wave", "onSizeChanged-------");
         initWaveShader();
 
     }
@@ -192,7 +218,7 @@ public class WaveLoadingView extends View {
             // 2*pi
             double defaultAngularFrequency = 2.0f * Math.PI / DEFAULT_WAVE_LENGTH_RATIO / width;
             float defaultAmplitude = height * DEFAULT_AMPLITUDE_RATIO;
-            mDefaultWaterLevel = height * 0.5f;
+            mDefaultWaterLevel = height * DEFAULT_WATER_LEVEL_RATIO;
             float defaultWaveLength = width;
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -253,4 +279,10 @@ public class WaveLoadingView extends View {
 
     }
 
+    @Override
+    public void onProcess(int process) {
+        process = process >= 0 ? process : 0;
+        process = process <= 100 ? process : 100;
+        setProgressValue((float) process / 100.0f);
+    }
 }

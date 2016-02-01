@@ -3,6 +3,7 @@ package com.tony.waveloading;
 import com.tony.wavelibrary.WaveConfig;
 import com.tony.wavelibrary.WaveLoadingView;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,7 +12,7 @@ import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity {
     Thread thread;
-    float temp;
+    int temp;
     WaveConfig waveConfig;
 
     @Override
@@ -19,22 +20,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // setContentView(R.layout.activity_main);
         waveConfig = new WaveConfig();
-        waveConfig.setmWavelevel(0.55f);
-        WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
+        waveConfig.setmWaveColor(Color.parseColor("#EE82EE"));
+        final WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
 
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(linearLayout);
-        temp = 0f;
+        temp = 0;
         thread = new Thread() {
             @Override
             public void run() {
 
-                while (Math.abs(temp-1f)>0.001) {
-                    Log.d("srcomp_wave", "temp:" + temp);
-                    temp = temp + 0.1f;
-                    waveConfig.setmWavelevel(temp);
+                while (temp <= 100) {
+                    // Log.d("srcomp_wave", "temp:" + temp);
+                    temp = temp + 10;
+                    waveLoadingView.onProcess(temp);
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {

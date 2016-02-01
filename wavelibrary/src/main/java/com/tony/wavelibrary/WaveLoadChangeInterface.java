@@ -6,6 +6,6 @@ package com.tony.wavelibrary;
 /**
  * Created by sanyinchen on 16/1/19.
  */
-public interface WaveLoadingListener {
+public interface WaveLoadChangeInterface {
     void onProcess(int process);
 }

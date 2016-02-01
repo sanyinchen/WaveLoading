@@ -9,35 +9,32 @@ import android.graphics.Color;
  * Created by sanyinchen on 16/1/19.
  */
 public class WaveConfig {
+
     private static final int DEFAULT_WAVE_COLOR = Color.parseColor("#FF4081");
     private static final int DEFAULT_TITLE_COLOR = Color.parseColor("#212121");
     private static final float DEFAULT_WATER_LEVEL_RATIO = 0.1f;
+    private static final float DEFAULT_AMPLITUDE = 0.05f;
     private int mWaveColor;
     private int mTitleSizeSp;
     private int mBoardSize;
     private int mTitleColor;
-    private float mWavelevel; //0.01-1f
+    private float mAmplitudeRatio;
 
     public WaveConfig() {
         mWaveColor = DEFAULT_WAVE_COLOR;
         mTitleColor = DEFAULT_TITLE_COLOR;
+        mAmplitudeRatio = DEFAULT_AMPLITUDE;
         mBoardSize = 4;
         mTitleSizeSp = 15;
-        mWavelevel = DEFAULT_WATER_LEVEL_RATIO;
+
     }
 
-    public float getmWavelevel() {
-        return mWavelevel;
+    public float getmAmplitudeRatio() {
+        return mAmplitudeRatio;
     }
 
-    public WaveConfig setmWavelevel(float mWavelevel) {
-        if (Math.abs(mWavelevel - 0f) <= 0.00001f) {
-            mWavelevel = 0.01f;
-        }
-        if (Math.abs(mWavelevel - 1f) <= 0.00001f) {
-            mWavelevel = 1f;
-        }
-        this.mWavelevel = mWavelevel;
+    public WaveConfig setmAmplitudeRatio(float mAmplitudeRatio) {
+        this.mAmplitudeRatio = mAmplitudeRatio;
         return this;
     }
 
@@ -45,7 +42,7 @@ public class WaveConfig {
         return mTitleColor;
     }
 
-    private WaveLoadingListener waveLoadingInterface;
+    private WaveLoadChangeInterface waveLoadingInterface;
 
     public int getmWaveColor() {
         return mWaveColor;
@@ -59,7 +56,7 @@ public class WaveConfig {
         return mBoardSize;
     }
 
-    public WaveLoadingListener getWaveLoadingInterface() {
+    public WaveLoadChangeInterface getWaveLoadingInterface() {
         return waveLoadingInterface;
     }
 
@@ -83,12 +80,12 @@ public class WaveConfig {
         return this;
     }
 
-    public WaveConfig setWaveLoadingInterface(WaveLoadingListener waveLoadingInterface) {
+    public WaveConfig setWaveLoadingInterface(WaveLoadChangeInterface waveLoadingInterface) {
         this.waveLoadingInterface = waveLoadingInterface;
         return this;
     }
 
-    public WaveConfig build(WaveLoadingListener waveLoadingInterface) {
+    public WaveConfig build(WaveLoadChangeInterface waveLoadingInterface) {
         this.waveLoadingInterface = waveLoadingInterface;
         return this;
     }
