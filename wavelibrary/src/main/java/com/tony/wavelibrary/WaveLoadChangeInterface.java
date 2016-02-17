@@ -7,5 +7,6 @@ package com.tony.wavelibrary;
  * Created by sanyinchen on 16/1/19.
  */
 public interface WaveLoadChangeInterface {
+    void onProgressFinish();
     void onProcess(int process);
 }
