@@ -280,6 +280,11 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     }
 
     @Override
+    public void onProgressFinish() {
+
+    }
+
+    @Override
     public void onProcess(int process) {
         process = process >= 0 ? process : 0;
         process = process <= 100 ? process : 100;
