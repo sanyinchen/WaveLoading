@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.os.Handler;
 import android.util.Log;
@@ -28,7 +29,8 @@ import android.view.animation.LinearInterpolator;
 public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     // draw
     private Context mContext;
-
+    private RectF rect;
+    private float perCent = 0.1f;
     // Dynamic Properties.
     private int mWaveColor;
     private WaveConfig waveConfig;
@@ -49,7 +51,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     // Paint to draw border.
     private Paint mBorderPaint;
 
-    private Paint mTextPaint;
+    private Paint mTextBoardPaint;
     private float mWavelevel;
     private Handler handler;
     // Animation.
@@ -73,6 +75,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
 
     private void init(Context mContext) {
         this.mContext = mContext;
+        rect = new RectF();
         handler = new Handler(mContext.getMainLooper());
         waveLevelanimatorSet = new AnimatorSet();
         mAnimatorSet = new AnimatorSet();
@@ -93,12 +96,13 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         mBorderPaint.setStrokeWidth(waveConfig.getmBoardSize());
         mBorderPaint.setColor(waveConfig.getmWaveColor());
 
-        mTextPaint = new Paint();
-        mTextPaint.setAntiAlias(true);
-        mTextPaint.setColor(waveConfig.getmTitleColor());
-        mTextPaint.setStyle(Paint.Style.FILL);
-        // mTextPaint.setStrokeWidth(4);
-        mTextPaint.setTextSize(CommonUtils.sp2px(getContext(), waveConfig.getmTitleSizeSp()));
+        mTextBoardPaint = new Paint();
+        mTextBoardPaint.setAntiAlias(true);
+        mTextBoardPaint.setColor(waveConfig.getmTitleColor());
+        mTextBoardPaint.setStyle(Paint.Style.STROKE);
+        mTextBoardPaint.setStrokeWidth(5);
+        // mTextBoardPaint.setTextSize(waveConfig.getmTitleSizeSp());
+        mTextBoardPaint.setTextSize(50f);
 
         int w = getWidth();
         int h = getHeight();
@@ -184,14 +188,14 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         float borderWidth = mBorderPaint.getStrokeWidth();
         if (borderWidth > 0) {
             canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
-                    (getWidth() - borderWidth) / 2f - 1f, mBorderPaint);
+                    (getWidth() - borderWidth) / 2f - 5f, mBorderPaint);
         }
         float radius = getWidth() / 2f - borderWidth;
-        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, mWavePaint);
+        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius - 5, mWavePaint);
         // canvas.drawBitmap(bitmapBuffer, 0, 0, mWavePaint);
-        float midle = mTextPaint.measureText(mTitle);
-        canvas.drawText(mTitle, getWidth() / 2 - midle, mDefaultWaterLevel, mTextPaint);
-
+        float midle = mTextBoardPaint.measureText(mTitle);
+        canvas.drawText(mTitle, getWidth() / 2 - midle, mDefaultWaterLevel, mTextBoardPaint);
+        canvas.drawArc(rect, -90, 360 * perCent, false, mTextBoardPaint);
     }
 
     @Override
@@ -199,6 +203,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         int width = measureWidth(widthMeasureSpec);
         int height = measureWidth(heightMeasureSpec);
         int radius = width < height ? width : height;
+        rect.set(0 + 5, 0 + 5, radius - 5, radius - 5);
         setMeasuredDimension(radius, radius);
     }
 
@@ -249,6 +254,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
             mWaveShader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
             this.mWavePaint.setShader(mWaveShader);
             bitmapBuffer = bitmap;
+
         }
 
     }
@@ -288,6 +294,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     public void onProcess(int process) {
         process = process >= 0 ? process : 0;
         process = process <= 100 ? process : 100;
-        setProgressValue((float) process / 100.0f);
+        perCent = (float) process / 100.0f;
+        setProgressValue(perCent);
     }
 }

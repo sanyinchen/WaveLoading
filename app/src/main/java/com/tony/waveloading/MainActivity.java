@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
         // setContentView(R.layout.activity_main);
         waveConfig = new WaveConfig();
         waveConfig.setmWaveColor(Color.parseColor("#EE82EE"));
+        waveConfig.setmTitleColor(Color.BLUE);
+        waveConfig.setmTitleSizeSp(30);
         final WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
 
         LinearLayout linearLayout = new LinearLayout(this);
