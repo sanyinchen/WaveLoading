@@ -110,7 +110,9 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
 
         // Init Animation
         initAnimation();
-
+//        canvas.drawText(String.format("%d%%", progress), startX - txtMarginX, startY + txtMarginY,
+//                textPaint);
+//        canvas.restore();
     }
 
     private void setProgressValue(float level) {
