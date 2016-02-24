@@ -110,9 +110,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
 
         // Init Animation
         initAnimation();
-//        canvas.drawText(String.format("%d%%", progress), startX - txtMarginX, startY + txtMarginY,
-//                textPaint);
-//        canvas.restore();
+
     }
 
     private void setProgressValue(float level) {
@@ -198,6 +196,34 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         float midle = mTextBoardPaint.measureText(mTitle);
         canvas.drawText(mTitle, getWidth() / 2 - midle, mDefaultWaterLevel, mTextBoardPaint);
         canvas.drawArc(rect, -90, 360 * perCent, false, mTextBoardPaint);
+        drawText(canvas);
+    }
+
+    private void drawText(Canvas canvas) {
+        float angle = 360 * perCent;
+        float angleX = (float) ((angle + 1.5) * Math.PI / 180f);
+        float angleY = (float) ((angle + 2) * Math.PI / 180f);
+
+        float startX = (float) (canvas.getWidth() / 2 - 5 + rect.width() / 2 * Math.sin(angleX));
+        float startY = (float) (canvas.getWidth() / 2 + 5 - rect.width() / 2 * Math.cos(angleY));
+
+        //        if (progress > 98) {
+        //            canvas.save();
+        //
+        //            txtMarginX = 30;
+        //            txtMarginY = -10;
+        //            canvas.rotate(angle, startX, startY);
+        //
+        //            canvas.drawText(String.format("%d%%", progress), startX - txtMarginX, startY + txtMarginY,
+        //                    textPaint);
+        //            canvas.restore();
+        //        } else {
+        float txtMarginX = 18;
+        float txtMarginY = 25;
+        canvas.drawText(mTitle, startX - txtMarginX, startY + 5,
+                mTextBoardPaint);
+
+        // }
     }
 
     @Override
