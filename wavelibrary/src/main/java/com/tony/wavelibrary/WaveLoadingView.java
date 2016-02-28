@@ -198,8 +198,6 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         canvas.drawArc(rect, -90, 360 * perCent, false, mTextBoardPaint);
         drawText(canvas);
 
-
-
     }
 
     private void drawText(Canvas canvas) {
