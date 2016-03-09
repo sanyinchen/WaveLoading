@@ -184,7 +184,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()),
                 (DEFAULT_WATER_LEVEL_RATIO - mWavelevel) * getHeight());
         mWaveShader.setLocalMatrix(mShaderMatrix);
-        // Log.d("srcomp_wave", "getmWavelevel:" + waveConfig.getmWavelevel());
+        Log.d("srcomp_wave", "getmWavelevel:" + mWavelevel);
         float borderWidth = mBorderPaint.getStrokeWidth();
         if (borderWidth > 0) {
             canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
@@ -194,12 +194,18 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius - 5, mWavePaint);
         // canvas.drawBitmap(bitmapBuffer, 0, 0, mWavePaint);
         float midle = mTextBoardPaint.measureText(mTitle);
+        float ascent = mTextBoardPaint.getFontMetrics().ascent;
+        float descent = mTextBoardPaint.getFontMetrics().descent;
+        float leading = mTextBoardPaint.getFontMetrics().leading;
+        float height = descent - ascent + leading;
         // canvas.drawText(mTitle, canvas.getWidth() / 2 - midle/2, mDefaultWaterLevel, mTextBoardPaint);
-        canvas.drawText(mTitle, canvas.getWidth() / 2 - midle/2, canvas.getHeight()/2, mTextBoardPaint);
-        canvas.drawArc(rect, -90, 360 * perCent, false, mTextBoardPaint);
+        canvas.drawText(mTitle, canvas.getWidth() / 2 - midle / 2,
+                (1 - mWavelevel) * getHeight() >= height ? (1 - mWavelevel)
+                        * getHeight() : height,
+                mTextBoardPaint);
+        canvas.drawArc(rect, -90, 360 * mWavelevel, false, mTextBoardPaint);
 
     }
-
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
