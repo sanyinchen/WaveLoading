@@ -61,6 +61,13 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     private static final float DEFAULT_WAVE_LENGTH_RATIO = 1.0f;
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
 
+    // title font measure
+    float titleMide;
+    float titleAscent;
+    float titleDescent;
+    float titleLeading;
+    float titleheight;
+
     public WaveLoadingView(Context context, WaveConfig waveConfig) {
         super(context);
         if (waveConfig == null) {
@@ -77,7 +84,6 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         handler = new Handler(mContext.getMainLooper());
         waveLevelanimatorSet = new AnimatorSet();
         mAnimatorSet = new AnimatorSet();
-        // Log.d("srcomp_wave", "waveLevel-------" + waveConfig.getmWavelevel());
         // Init Wave.
         mShaderMatrix = new Matrix();
         mWavePaint = new Paint();
@@ -192,15 +198,15 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         float radius = getWidth() / 2f - borderWidth;
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius - 5, mWavePaint);
         // canvas.drawBitmap(bitmapBuffer, 0, 0, mWavePaint);
-        float midle = mTextBoardPaint.measureText(mTitle);
-        float ascent = mTextBoardPaint.getFontMetrics().ascent;
-        float descent = mTextBoardPaint.getFontMetrics().descent;
-        float leading = mTextBoardPaint.getFontMetrics().leading;
-        float height = descent - ascent + leading;
+        titleMide = mTextBoardPaint.measureText(mTitle);
+        titleAscent = mTextBoardPaint.getFontMetrics().ascent;
+        titleDescent = mTextBoardPaint.getFontMetrics().descent;
+        titleLeading = mTextBoardPaint.getFontMetrics().leading;
+        titleheight = titleDescent - titleAscent + titleLeading;
         // canvas.drawText(mTitle, canvas.getWidth() / 2 - midle/2, mDefaultWaterLevel, mTextBoardPaint);
-        canvas.drawText(mTitle, canvas.getWidth() / 2 - midle / 2,
-                (1 - mWavelevel) * getHeight() >= height ? (1 - mWavelevel)
-                        * getHeight() : height,
+        canvas.drawText(mTitle, canvas.getWidth() / 2 - titleMide / 2,
+                (1 - mWavelevel) * getHeight() >= titleheight ? (1 - mWavelevel)
+                        * getHeight() : titleheight,
                 mTextBoardPaint);
         canvas.drawArc(rect, -90, 360 * mWavelevel, false, mTextBoardPaint);
 
