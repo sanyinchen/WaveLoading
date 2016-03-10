@@ -24,7 +24,7 @@ import android.view.animation.LinearInterpolator;
 /**
  * Created by sanyinchen on 16/1/19.
  */
-public class WaveLoadingView extends View implements WaveLoadChangeInterface {
+public class WaveLoadingView extends View {
     // draw
     private Context mContext;
     private RectF rect;
@@ -50,6 +50,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     private Paint mBorderPaint;
 
     private Paint mTextBoardPaint;
+    private Paint mCircleBoardPaint;
     private float mWavelevel;
     private Handler handler;
     // Animation.
@@ -62,11 +63,13 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
     private static final float DEFAULT_WAVE_SHIFT_RATIO = 0.0f;
 
     // title font measure
-    float titleMide;
-    float titleAscent;
-    float titleDescent;
-    float titleLeading;
-    float titleheight;
+    private float titleMide;
+    private float titleAscent;
+    private float titleDescent;
+    private float titleLeading;
+    private float titleheight;
+    private volatile boolean isFinish = false;
+    private volatile boolean isStart = false;
 
     public WaveLoadingView(Context context, WaveConfig waveConfig) {
         super(context);
@@ -104,10 +107,17 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         mTextBoardPaint = new Paint();
         mTextBoardPaint.setAntiAlias(true);
         mTextBoardPaint.setColor(waveConfig.getmTitleColor());
-        mTextBoardPaint.setStyle(Paint.Style.STROKE);
+        mTextBoardPaint.setStyle(Paint.Style.FILL);
         mTextBoardPaint.setStrokeWidth(waveConfig.getmTitleBoardSize());
         // mTextBoardPaint.setTextSize(waveConfig.getmTitleSizeSp());
         mTextBoardPaint.setTextSize(CommonUtils.dp2px(mContext, waveConfig.getmTitleSizeSp()));
+
+        // init board hoop
+        mCircleBoardPaint = new Paint();
+        mCircleBoardPaint.setAntiAlias(true);
+        mCircleBoardPaint.setColor(waveConfig.getmCircleBoardColor());
+        mCircleBoardPaint.setStyle(Paint.Style.STROKE);
+        mCircleBoardPaint.setStrokeWidth(waveConfig.getmCircleBoardStorkeSize());
 
         int w = getWidth();
         int h = getHeight();
@@ -189,26 +199,47 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         mShaderMatrix.postTranslate((float) (mWaveShiftRatio * getWidth()),
                 (DEFAULT_WATER_LEVEL_RATIO - mWavelevel) * getHeight());
         mWaveShader.setLocalMatrix(mShaderMatrix);
-        Log.d("srcomp_wave", "getmWavelevel:" + mWavelevel);
+        // Log.d("srcomp_wave", "getmWavelevel:" + mWavelevel);
         float borderWidth = mBorderPaint.getStrokeWidth();
         if (borderWidth > 0) {
             canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
-                    (getWidth() - borderWidth) / 2f , mBorderPaint);
+                    (getWidth() - borderWidth) / 2f - waveConfig.getmOffesetOfCircleBoard(), mBorderPaint);
         }
         float radius = getWidth() / 2f - borderWidth;
-        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius - 5, mWavePaint);
+        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
+                radius - waveConfig.getmHoopPadding() + waveConfig.getmDistanceOffset(),
+                mWavePaint);
         // canvas.drawBitmap(bitmapBuffer, 0, 0, mWavePaint);
         titleMide = mTextBoardPaint.measureText(mTitle);
         titleAscent = mTextBoardPaint.getFontMetrics().ascent;
         titleDescent = mTextBoardPaint.getFontMetrics().descent;
         titleLeading = mTextBoardPaint.getFontMetrics().leading;
-        titleheight = titleDescent - titleAscent + titleLeading;
-        // canvas.drawText(mTitle, canvas.getWidth() / 2 - midle/2, mDefaultWaterLevel, mTextBoardPaint);
-        canvas.drawText(mTitle, canvas.getWidth() / 2 - titleMide / 2,
-                (1 - mWavelevel) * getHeight() >= titleheight ? (1 - mWavelevel)
-                        * getHeight() : titleheight,
-                mTextBoardPaint);
-        canvas.drawArc(rect, -90, 360 * mWavelevel, false, mTextBoardPaint);
+        // Log.d("srcomp",
+        //         "titleAscent: " + titleAscent + " titleDescent: " + titleDescent + " titleLeading" + titleLeading);
+        titleheight = Math.abs(titleDescent - titleAscent + titleLeading);
+        drawProcessText(canvas);
+        drawGrowingHoop(canvas);
+
+    }
+
+    private void drawGrowingHoop(Canvas canvas) {
+        if (waveConfig.ismShowHoopGrow()) {
+            canvas.drawArc(rect, -90, 360 * mWavelevel, false, mCircleBoardPaint);
+        }
+    }
+
+    private void drawProcessText(Canvas canvas) {
+        if (waveConfig.ismShowProcess()) {
+
+            if (waveConfig.ismCenterlTitle()) {
+                canvas.drawText(mTitle, canvas.getWidth() / 2 - titleMide / 2, mDefaultWaterLevel, mTextBoardPaint);
+            } else {
+                canvas.drawText(mTitle, canvas.getWidth() / 2 - titleMide / 2,
+                        (1 - mWavelevel) * getHeight() >= titleheight ? (1 - mWavelevel)
+                                * getHeight() : titleheight,
+                        mTextBoardPaint);
+            }
+        }
 
     }
 
@@ -217,8 +248,19 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         int width = measureWidth(widthMeasureSpec);
         int height = measureWidth(heightMeasureSpec);
         int radius = width < height ? width : height;
-        rect.set(0 + 5, 0 + 5, radius - 5, radius - 5);
+        rect.set(0 + getrectPadding(), 0 + getrectPadding(),
+                radius - getrectPadding(), radius - getrectPadding());
         setMeasuredDimension(radius, radius);
+    }
+
+    private float getrectPadding() {
+        //return waveConfig.getmCircleBoardStorkeSize() + waveConfig.getmHoopPadding();
+        // return mBorderPaint.getStrokeWidth() + waveConfig.getmHoopPadding();
+        if (Math.abs(waveConfig.getmHoopPadding() - 0) >= 0.001) {
+            return waveConfig.getmHoopPadding();
+        } else {
+            return mBorderPaint.getStrokeWidth();
+        }
     }
 
     @Override
@@ -226,6 +268,12 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         super.onSizeChanged(w, h, oldw, oldh);
         // Log.d("srcomp_wave", "onSizeChanged-------");
         initWaveShader();
+
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
 
     }
 
@@ -299,16 +347,48 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
 
     }
 
-    @Override
-    public void onProgressFinish() {
-
+    public void progressStart() {
+        if (waveConfig != null && waveConfig.getWaveLoadingInterface() != null) {
+            waveConfig.getWaveLoadingInterface().onProgressStart();
+        } else {
+            Log.d("demo", "waveConfig is null");
+        }
     }
 
-    @Override
-    public void onProcess(int process) {
+    public void progressFinish() {
+        if (!isFinish) {
+            if (waveConfig != null && waveConfig.getWaveLoadingInterface() != null) {
+                waveConfig.getWaveLoadingInterface().onProgressFinish();
+            }
+            isFinish = true;
+            isStart = false;
+        }
+    }
+
+    public void setProgress(int process) {
+        if (!isStart) {
+            isStart = true;
+            isFinish = false;
+            progressStart();
+
+
+        }
         process = process >= 0 ? process : 0;
         process = process <= 100 ? process : 100;
         perCent = (float) process / 100.0f;
         setProgressValue(perCent);
+        if (waveConfig != null && waveConfig.getWaveLoadingInterface() != null) {
+            waveConfig.getWaveLoadingInterface().onProgress(process);
+        }
+
+        if (Math.abs(perCent - 1) <= 0.00000001) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    progressFinish();
+                }
+            }, 100);
+        }
     }
+
 }

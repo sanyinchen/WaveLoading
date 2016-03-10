@@ -1,6 +1,7 @@
 package com.tony.waveloading;
 
 import com.tony.wavelibrary.WaveConfig;
+import com.tony.wavelibrary.WaveLoadChangeInterface;
 import com.tony.wavelibrary.WaveLoadingView;
 
 import android.graphics.Color;
@@ -21,10 +22,30 @@ public class MainActivity extends AppCompatActivity {
         // setContentView(R.layout.activity_main);
         waveConfig = new WaveConfig();
         waveConfig.setmWaveColor(Color.parseColor("#EE82EE"));
-        waveConfig.setmTitleColor(Color.BLUE);
-        waveConfig.setmTitleSizeSp(30);
-        final WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
+        waveConfig.setmTitleColor(Color.RED);
+        waveConfig.setmCircleBoardColor(Color.RED);
+        waveConfig.setmTitleSizeSp(20);
+        // waveConfig.setmShowHoopGrow(false);
+        // waveConfig.setmShowProcess(false);
+        waveConfig.setmCenterlTitle(false);
+        waveConfig.setWaveLoadingInterface(new WaveLoadChangeInterface() {
+            @Override
+            public void onProgressStart() {
+                Log.d("demon", "--------start");
+            }
 
+            @Override
+            public void onProgressFinish() {
+                Log.d("demon", "--------end");
+            }
+
+            @Override
+            public void onProgress(int process) {
+                Log.d("demon", "--------process: " + process);
+            }
+        });
+        // waveConfig.setmHoopPadding(5);
+        final WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -34,10 +55,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                while (temp <= 100) {
+                while (temp < 100) {
                     // Log.d("srcomp_wave", "temp:" + temp);
                     temp = temp + 10;
-                    waveLoadingView.onProcess(temp);
+                    waveLoadingView.setProgress(temp);
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {

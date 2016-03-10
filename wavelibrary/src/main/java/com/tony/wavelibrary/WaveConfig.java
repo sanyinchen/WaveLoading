@@ -17,6 +17,76 @@ public class WaveConfig {
     private int mWaveColor;
     private int mTitleSizeSp;
     private int mTitleBoardSize;
+    private int mCircleBoardStorkeSize;
+    private int mCircleBoardColor;//  growing hoop
+    private int mDistancePadding;// the distance of between  growing hoop and  board
+    private int mBoardSize;
+    private int mTitleColor;
+    private float mAmplitudeRatio;
+    private float mDistanceOffset;
+    private float mOffesetOfCircleBoard;
+    private boolean mCenterlTitle;
+    private boolean mShowProcess;
+    private boolean mShowHoopGrow;
+
+    public boolean ismShowHoopGrow() {
+        return mShowHoopGrow;
+    }
+
+    public void setmShowHoopGrow(boolean mShowHoopGrow) {
+        this.mShowHoopGrow = mShowHoopGrow;
+    }
+
+    public boolean ismShowProcess() {
+        return mShowProcess;
+    }
+
+    public void setmShowProcess(boolean mShowProcess) {
+        this.mShowProcess = mShowProcess;
+    }
+
+    public boolean ismCenterlTitle() {
+
+        return mCenterlTitle;
+    }
+
+    public void setmCenterlTitle(boolean mCenterlTitle) {
+        this.mCenterlTitle = mCenterlTitle;
+    }
+
+    public float getmOffesetOfCircleBoard() {
+        return mOffesetOfCircleBoard;
+    }
+
+    public void setmOffesetOfCircleBoard(float mOffesetOfCircleBoard) {
+        this.mOffesetOfCircleBoard = mOffesetOfCircleBoard;
+    }
+
+    public float getmDistanceOffset() {
+        return mDistanceOffset;
+    }
+
+    public void setmDistanceOffset(float mDistanceOffset) {
+        this.mDistanceOffset = mDistanceOffset;
+    }
+
+    private float mHoopPadding;
+
+    public int getmDistancePadding() {
+        return mDistancePadding;
+    }
+
+    public void setmDistancePadding(int mDistancePadding) {
+        this.mDistancePadding = mDistancePadding;
+    }
+
+    public float getmHoopPadding() {
+        return mHoopPadding;
+    }
+
+    public void setmHoopPadding(float mHoopPadding) {
+        this.mHoopPadding = mHoopPadding;
+    }
 
     public int getmTitleBoardSize() {
         return mTitleBoardSize;
@@ -26,9 +96,21 @@ public class WaveConfig {
         this.mTitleBoardSize = mTitleBoardSize;
     }
 
-    private int mBoardSize;
-    private int mTitleColor;
-    private float mAmplitudeRatio;
+    public int getmCircleBoardStorkeSize() {
+        return mCircleBoardStorkeSize;
+    }
+
+    public void setmCircleBoardStorkeSize(int mCircleBoardStorkeSize) {
+        this.mCircleBoardStorkeSize = mCircleBoardStorkeSize;
+    }
+
+    public int getmCircleBoardColor() {
+        return mCircleBoardColor;
+    }
+
+    public void setmCircleBoardColor(int mCircleBoardColor) {
+        this.mCircleBoardColor = mCircleBoardColor;
+    }
 
     public WaveConfig() {
         mWaveColor = DEFAULT_WAVE_COLOR;
@@ -37,7 +119,15 @@ public class WaveConfig {
         mBoardSize = 4;
         mTitleSizeSp = 15;
         mTitleBoardSize = 5;
-
+        mCircleBoardStorkeSize = 5;
+        mCircleBoardColor = DEFAULT_WAVE_COLOR;
+        mDistancePadding = 0;
+        mDistanceOffset = 2f;
+        mHoopPadding = 0;
+        mOffesetOfCircleBoard = 2f;
+        mCenterlTitle = true;
+        mShowProcess = true;
+        mShowHoopGrow = true;
     }
 
     public float getmAmplitudeRatio() {

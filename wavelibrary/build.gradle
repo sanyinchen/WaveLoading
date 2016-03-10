@@ -2,7 +2,7 @@
  * Copyright (C) 2016 Baidu, Inc. All Rights Reserved.
  */
 apply plugin: 'com.android.library'
-
+apply plugin: 'maven'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -25,4 +25,18 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("../repo"))
+            pom.project {
+                name 'wavelibrary'
+                groupId 'com.tony.loading'
+                artifactId 'wavelibrary'
+                version '1.0.0'
+
+            }
+        }
+    }
 }
