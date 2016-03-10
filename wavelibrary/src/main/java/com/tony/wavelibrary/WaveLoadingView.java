@@ -363,7 +363,7 @@ public class WaveLoadingView extends View {
             isFinish = true;
             isStart = false;
         }
-        Log.d("tets","demo---");
+
     }
 
     public void setProgress(int process) {
