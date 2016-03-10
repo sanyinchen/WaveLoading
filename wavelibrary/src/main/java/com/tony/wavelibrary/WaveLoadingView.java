@@ -3,8 +3,6 @@
  */
 package com.tony.wavelibrary;
 
-import java.lang.ref.WeakReference;
-
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -96,13 +94,14 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         mBorderPaint.setStrokeWidth(waveConfig.getmBoardSize());
         mBorderPaint.setColor(waveConfig.getmWaveColor());
 
+        // init titleText
         mTextBoardPaint = new Paint();
         mTextBoardPaint.setAntiAlias(true);
         mTextBoardPaint.setColor(waveConfig.getmTitleColor());
         mTextBoardPaint.setStyle(Paint.Style.STROKE);
-        mTextBoardPaint.setStrokeWidth(5);
+        mTextBoardPaint.setStrokeWidth(waveConfig.getmTitleBoardSize());
         // mTextBoardPaint.setTextSize(waveConfig.getmTitleSizeSp());
-        mTextBoardPaint.setTextSize(50f);
+        mTextBoardPaint.setTextSize(CommonUtils.dp2px(mContext, waveConfig.getmTitleSizeSp()));
 
         int w = getWidth();
         int h = getHeight();
@@ -188,7 +187,7 @@ public class WaveLoadingView extends View implements WaveLoadChangeInterface {
         float borderWidth = mBorderPaint.getStrokeWidth();
         if (borderWidth > 0) {
             canvas.drawCircle(getWidth() / 2f, getHeight() / 2f,
-                    (getWidth() - borderWidth) / 2f - 5f, mBorderPaint);
+                    (getWidth() - borderWidth) / 2f , mBorderPaint);
         }
         float radius = getWidth() / 2f - borderWidth;
         canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius - 5, mWavePaint);

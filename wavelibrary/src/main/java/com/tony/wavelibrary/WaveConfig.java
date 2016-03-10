@@ -16,6 +16,16 @@ public class WaveConfig {
     private static final float DEFAULT_AMPLITUDE = 0.05f;
     private int mWaveColor;
     private int mTitleSizeSp;
+    private int mTitleBoardSize;
+
+    public int getmTitleBoardSize() {
+        return mTitleBoardSize;
+    }
+
+    public void setmTitleBoardSize(int mTitleBoardSize) {
+        this.mTitleBoardSize = mTitleBoardSize;
+    }
+
     private int mBoardSize;
     private int mTitleColor;
     private float mAmplitudeRatio;
@@ -26,6 +36,7 @@ public class WaveConfig {
         mAmplitudeRatio = DEFAULT_AMPLITUDE;
         mBoardSize = 4;
         mTitleSizeSp = 15;
+        mTitleBoardSize = 5;
 
     }
 
