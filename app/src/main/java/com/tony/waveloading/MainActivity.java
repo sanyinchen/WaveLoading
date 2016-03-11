@@ -10,25 +10,63 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
-    Thread thread;
-    int temp;
-    WaveConfig waveConfig;
+
+    WaveLoadingView[] waveLoadingViews = new WaveLoadingView[6];
+    WaveConfig[] waveConfigs = new WaveConfig[6];
+    SeekBar seekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.activity_main);
-        waveConfig = new WaveConfig();
-        waveConfig.setmWaveColor(Color.parseColor("#EE82EE"));
-        waveConfig.setmTitleColor(Color.RED);
-        waveConfig.setmCircleBoardColor(Color.RED);
-        waveConfig.setmTitleSizeSp(20);
+        setContentView(R.layout.activity_main);
+        seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        getConfigs();
+        for (int i = 1; i <= 6; i++) {
+            waveLoadingViews[i - 1] =
+                    (WaveLoadingView) findViewById(this.getResources().getIdentifier("wave_type" + i, "id",
+                            this.getPackageName()));
+        }
+        for (int i = 0; i < waveConfigs.length; i++) {
+            waveLoadingViews[i].setConfig(waveConfigs[i]);
+        }
+        seekBar.setMax(100);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                for (int i = 0; i < 6; i++) {
+                    waveLoadingViews[i].setProgress(seekBar.getProgress());
+                }
+            }
+        });
+        // waveConfig.setmHoopPadding(5);
+
+    }
+
+    private void getConfigs() {
+        for (int i = 0; i < 6; i++) {
+            waveConfigs[i] = new WaveConfig();
+        }
+        waveConfigs[0].setmWaveColor(Color.parseColor("#EE82EE"));
+        waveConfigs[0].setmTitleColor(Color.RED);
+        waveConfigs[0].setmCircleBoardColor(Color.RED);
+        waveConfigs[0].setmTitleSizeSp(15);
         // waveConfig.setmShowHoopGrow(false);
         // waveConfig.setmShowProcess(false);
-        waveConfig.setmCenterlTitle(false);
-        waveConfig.setWaveLoadingInterface(new WaveLoadChangeInterface() {
+        waveConfigs[0].setmCenterlTitle(false);
+        waveConfigs[0].setWaveLoadingInterface(new WaveLoadChangeInterface() {
             @Override
             public void onProgressStart() {
                 Log.d("demon", "--------start");
@@ -44,38 +82,22 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("demon", "--------process: " + process);
             }
         });
-        // waveConfig.setmHoopPadding(5);
-        final WaveLoadingView waveLoadingView = new WaveLoadingView(this, waveConfig);
-        LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.addView(waveLoadingView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        setContentView(linearLayout);
-        temp = 0;
-        thread = new Thread() {
-            @Override
-            public void run() {
 
-                while (temp < 100) {
-                    // Log.d("srcomp_wave", "temp:" + temp);
-                    temp = temp + 10;
-                    waveLoadingView.setProgress(temp);
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
+        waveConfigs[1].setmShowHoopGrow(true);
+        waveConfigs[1].setmCircleBoardColor(Color.GREEN);
 
-        thread.start();
+        waveConfigs[3].setmHoopPadding(5);
+        waveConfigs[3].setmCircleBoardColor(Color.BLUE);
+
+        waveConfigs[4].setmShowHoopGrow(true);
+        waveConfigs[4].setmCircleBoardColor(Color.YELLOW);
+
+        waveConfigs[5].setmShowProcess(false);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (thread.isAlive()) {
-            thread.stop();
-        }
+
     }
 }

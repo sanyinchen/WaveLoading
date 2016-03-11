@@ -16,6 +16,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -79,6 +80,28 @@ public class WaveLoadingView extends View {
         this.waveConfig = waveConfig;
         init(context);
 
+    }
+
+    public WaveLoadingView(Context context) {
+        super(context);
+        this.mContext = context;
+
+    }
+
+    public WaveLoadingView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        this.waveConfig = new WaveConfig();
+        init(context);
+
+
+    }
+
+    public void setConfig(WaveConfig waveConfig) {
+        if (waveConfig == null) {
+            new Exception("WaveConfig must not be null");
+        }
+        this.waveConfig = waveConfig;
+        init(this.mContext);
     }
 
     private void init(Context mContext) {
@@ -145,12 +168,12 @@ public class WaveLoadingView extends View {
     }
 
     public void setWaveLevelRatio(float waveLevelRatio) {
-        if (this.mWavelevel < waveLevelRatio) {
+        // if (this.mWavelevel < waveLevelRatio) {
             mWavelevel = waveLevelRatio;
             mTitle = (int) (waveLevelRatio * 100) + "%";
             // Log.d("srcomp_wave", "setWaveLevelRatio-------" + waveLevelRatio);
             invalidate();
-        }
+      //  }
     }
 
     private void initAnimation() {
@@ -371,7 +394,6 @@ public class WaveLoadingView extends View {
             isStart = true;
             isFinish = false;
             progressStart();
-
 
         }
         process = process >= 0 ? process : 0;
