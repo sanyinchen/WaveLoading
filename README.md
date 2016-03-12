@@ -20,7 +20,8 @@ This is a loading ui lib.The lib is inspired by another [WaveLoading](https://gi
 ##How to use
 You can use two styles to instance the WaveLoadingView object.  
 
-+ WaveLoadingView waveLoading =new WaveLoadingView();  
++ ```WaveLoadingView waveLoading =new WaveLoadingView();  ```
+
 + 
 
 ```
@@ -57,8 +58,10 @@ waveConfigs.setmWaveColor(Color.parseColor("#EE82EE"));
             }
         });
 ```
-
 e.g
+
+Finally, set the config to your waveLoading instance.
+```waveLoadingView.setConfig(waveConfigs);```
 
 ##Summary  
 * If you have any question,please email to me(My email:sanyinchen@gmail.com)
