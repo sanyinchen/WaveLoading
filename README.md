@@ -60,7 +60,8 @@ waveConfigs.setmWaveColor(Color.parseColor("#EE82EE"));
 ```
 e.g
 
-Finally, set the config to your waveLoading instance.
+Finally, set the config to your waveLoading instance.  
+
 ```waveLoadingView.setConfig(waveConfigs);```
 
 ##Summary  
