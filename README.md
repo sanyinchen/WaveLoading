@@ -1,11 +1,11 @@
 # WaveLoading
-##Describe  
+## Describe  
 This is a loading ui lib.The lib is inspired by another [WaveLoading](https://github.com/tangqi92/WaveLoadingView) project.There are a config object to set up your wave loading.So you can set  a variety of loading style,and it includes three status callback in order to do your action.
 ##ScreenShot  
 
 ![](https://github.com/sanyinchen/WaveLoading/blob/master/screenshot/scrennshot.gif)
 
-##Dependencies  
+## Dependencies  
 
 
 	repositories {
@@ -17,7 +17,7 @@ This is a loading ui lib.The lib is inspired by another [WaveLoading](https://gi
 	        compile 'com.github.sanyinchen:WaveLoading:2.1'
 	}
 	
-##How to use
+## How to use
 You can use two styles to instance the WaveLoadingView object.  
 
 + ```WaveLoadingView waveLoading =new WaveLoadingView();  ```
@@ -62,6 +62,6 @@ e.g
 
 Finally, set the config to your waveLoading instance.```waveLoadingView.setConfig(waveConfigs);```
 
-##Summary  
+## Summary  
 * If you have any question,please email to me(My email:sanyinchen@gmail.com)
 * Welcome to subscribe my [google+](https://plus.google.com/u/0/100465464266192894461)  
